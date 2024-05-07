@@ -8,6 +8,9 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [url, setUrl] = useState("");
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -38,7 +41,7 @@ const App = () => {
       setUsername("");
       setPassword("");
       console.log("logged in with", user.username);
-      console.log("Blogs fetched:", blogs); // Add this line for debugging
+      console.log("Blogs fetched:", blogs);
     } catch (exception) {
       setErrorMessage("Wrong credentials");
       setTimeout(() => {
@@ -72,6 +75,39 @@ const App = () => {
     </form>
   );
 
+  const newBlog = () => (
+    <form onSubmit={addNewBlog}>
+      <div>
+        title:
+        <input
+          type="title"
+          value={title}
+          name="Title"
+          onChange={({ target }) => setTitle(target.value)}
+        />
+      </div>
+      <div>
+        author:
+        <input
+          type="author"
+          value={author}
+          name="Author"
+          onChange={({ target }) => setAuthor(target.value)}
+        />
+      </div>
+      <div>
+        url:
+        <input
+          type="url"
+          value={url}
+          name="Url"
+          onChange={({ target }) => setUrl(target.value)}
+        />
+      </div>
+      <button type="submit">Create</button>
+    </form>
+  );
+
   const handleLogout = async (event) => {
     event.preventDefault();
     try {
@@ -88,6 +124,31 @@ const App = () => {
     }
   };
 
+  const addNewBlog = async (event) => {
+    event.preventDefault();
+
+    try {
+      const newBlog = {
+        title: title,
+        author: author,
+        url: url,
+      };
+
+      // Make a POST request to create the new blog post
+      const returnedBlog = await blogService.create(newBlog);
+
+      setBlogs([...blogs, returnedBlog]);
+
+      setTitle("");
+      setAuthor("");
+      setUrl("");
+
+      console.log("New blog added:", returnedBlog);
+    } catch (exception) {
+      console.error("Error adding new blog:", exception);
+    }
+  };
+
   return (
     <div>
       {user === null ? (
@@ -95,8 +156,11 @@ const App = () => {
       ) : (
         <div>
           <h2>Blogs</h2>
-          <button onClick={handleLogout}>Log out</button>
           <p>{user.name} is logged in.</p>
+          <button onClick={handleLogout}>Log out</button>
+          <h2>create new</h2>
+          <div>{newBlog()}</div>
+          <br />
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
           ))}
