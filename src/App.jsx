@@ -31,6 +31,8 @@ const App = () => {
         password,
       });
 
+      window.localStorage.setItem("loggedNoteappUser", JSON.stringify(user));
+
       blogService.setToken(user.token);
       setUser(user);
       setUsername("");
@@ -70,6 +72,22 @@ const App = () => {
     </form>
   );
 
+  const handleLogout = async (event) => {
+    event.preventDefault();
+    try {
+      window.localStorage.removeItem("loggedNoteappUser");
+
+      setUser(null);
+
+      setUsername("");
+      setPassword("");
+
+      console.log("Logged out successfully");
+    } catch (exception) {
+      console.error("Error logging out:", exception);
+    }
+  };
+
   return (
     <div>
       {user === null ? (
@@ -77,6 +95,7 @@ const App = () => {
       ) : (
         <div>
           <h2>Blogs</h2>
+          <button onClick={handleLogout}>Log out</button>
           <p>{user.name} is logged in.</p>
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
