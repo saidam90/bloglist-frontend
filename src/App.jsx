@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import Notification from "./components/Notification";
+import "./index.css";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -11,6 +13,7 @@ const App = () => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -43,9 +46,9 @@ const App = () => {
       console.log("logged in with", user.username);
       console.log("Blogs fetched:", blogs);
     } catch (exception) {
-      setErrorMessage("Wrong credentials");
+      setMessage("Wrong credentials");
       setTimeout(() => {
-        setErrorMessage(null);
+        setMessage(null);
       }, 5000);
     }
   };
@@ -142,8 +145,12 @@ const App = () => {
       setTitle("");
       setAuthor("");
       setUrl("");
+      setMessage(`${newBlog.title} was added by ${newBlog.author}.`);
 
       console.log("New blog added:", returnedBlog);
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
     } catch (exception) {
       console.error("Error adding new blog:", exception);
     }
@@ -156,6 +163,7 @@ const App = () => {
       ) : (
         <div>
           <h2>Blogs</h2>
+          <Notification message={message} />
           <p>{user.name} is logged in.</p>
           <button onClick={handleLogout}>Log out</button>
           <h2>create new</h2>
