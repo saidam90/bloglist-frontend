@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
+import Login from "./components/Login";
+import Notification from "./components/Notification";
+import BlogForm from "./components/BlogForm";
+import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
-import Notification from "./components/Notification";
 import "./index.css";
 
 const App = () => {
@@ -10,10 +13,8 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
   const [message, setMessage] = useState(null);
+  const [loginVisible, setLoginVisible] = useState(false);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -53,64 +54,6 @@ const App = () => {
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <h2>Log in to application</h2>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
-
-  const newBlog = () => (
-    <form onSubmit={addNewBlog}>
-      <div>
-        title:
-        <input
-          type="title"
-          value={title}
-          name="Title"
-          onChange={({ target }) => setTitle(target.value)}
-        />
-      </div>
-      <div>
-        author:
-        <input
-          type="author"
-          value={author}
-          name="Author"
-          onChange={({ target }) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        url:
-        <input
-          type="url"
-          value={url}
-          name="Url"
-          onChange={({ target }) => setUrl(target.value)}
-        />
-      </div>
-      <button type="submit">Create</button>
-    </form>
-  );
-
   const handleLogout = async (event) => {
     event.preventDefault();
     try {
@@ -127,33 +70,37 @@ const App = () => {
     }
   };
 
-  const addNewBlog = async (event) => {
-    event.preventDefault();
-
-    try {
-      const newBlog = {
-        title: title,
-        author: author,
-        url: url,
-      };
-
-      // Make a POST request to create the new blog post
-      const returnedBlog = await blogService.create(newBlog);
-
-      setBlogs([...blogs, returnedBlog]);
-
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      setMessage(`${newBlog.title} was added by ${newBlog.author}.`);
-
-      console.log("New blog added:", returnedBlog);
+  const addBlog = (blogObject) => {
+    blogService.create(blogObject).then((returnedBlog) => {
+      setBlogs(blogs.concat(returnedBlog));
+      setMessage(`${blogObject.title} was added by ${blogObject.author}.`);
       setTimeout(() => {
         setMessage(null);
       }, 5000);
-    } catch (exception) {
-      console.error("Error adding new blog:", exception);
-    }
+    });
+  };
+
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? "none" : "" };
+    const showWhenVisible = { display: loginVisible ? "" : "none" };
+
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>log in</button>
+        </div>
+        <div style={showWhenVisible}>
+          <Login
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          />
+          <button onClick={() => setLoginVisible(false)}>cancel</button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -166,8 +113,10 @@ const App = () => {
           <Notification message={message} />
           <p>{user.name} is logged in.</p>
           <button onClick={handleLogout}>Log out</button>
-          <h2>create new</h2>
-          <div>{newBlog()}</div>
+          <Togglable buttonLabel="new blog">
+            <BlogForm createBlog={addBlog} />
+          </Togglable>
+
           <br />
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
