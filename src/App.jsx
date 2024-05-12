@@ -103,6 +103,21 @@ const App = () => {
     );
   };
 
+  const updateBlog = async (blog, id) => {
+    try {
+      const updatedBlog = await blogService.update(blog, id);
+      setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
+      console.log("Blog updated:", updatedBlog);
+    } catch (error) {
+      console.error("Error updating blog:", error);
+    }
+  };
+
+  const removeBlog = async (id) => {
+    await blogService.remove(id);
+    getBlogs();
+  };
+
   return (
     <div>
       {user === null ? (
@@ -119,7 +134,12 @@ const App = () => {
 
           <br />
           {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              addLike={updateBlog}
+              removeBlog={removeBlog}
+            />
           ))}
         </div>
       )}
