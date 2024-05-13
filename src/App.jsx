@@ -17,10 +17,6 @@ const App = () => {
   const [loginVisible, setLoginVisible] = useState(false);
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
-
-  useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedNoteappUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
@@ -70,16 +66,6 @@ const App = () => {
     }
   };
 
-  const addBlog = (blogObject) => {
-    blogService.create(blogObject).then((returnedBlog) => {
-      setBlogs(blogs.concat(returnedBlog));
-      setMessage(`${blogObject.title} was added by ${blogObject.author}.`);
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
-    });
-  };
-
   const loginForm = () => {
     const hideWhenVisible = { display: loginVisible ? "none" : "" };
     const showWhenVisible = { display: loginVisible ? "" : "none" };
@@ -103,11 +89,38 @@ const App = () => {
     );
   };
 
+  const getBlogs = async () => {
+    try {
+      const allBlogs = await blogService.getAll();
+      const sortedBlogs = allBlogs.sort((a, b) => b.likes - a.likes);
+      setBlogs(sortedBlogs);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+    }
+  };
+
+  useEffect(() => {
+    getBlogs();
+  }, []);
+
+  const addBlog = async (blogObject) => {
+    try {
+      await blogService.create(blogObject);
+      getBlogs();
+
+      setMessage(`${blogObject.title} was added by ${blogObject.author}.`);
+    } catch (error) {
+      showNotification("Failed to add new blog", setErrorMessage);
+    }
+    setTimeout(() => {
+      setMessage(null);
+    }, 5000);
+  };
+
   const updateBlog = async (blog, id) => {
     try {
-      const updatedBlog = await blogService.update(blog, id);
-      setBlogs(blogs.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
-      console.log("Blog updated:", updatedBlog);
+      await blogService.update(blog, id);
+      getBlogs();
     } catch (error) {
       console.error("Error updating blog:", error);
     }

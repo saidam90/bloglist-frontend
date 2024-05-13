@@ -9,6 +9,8 @@ const Blog = ({ blog, user, addLike, removeBlog }) => {
       likes: blog.likes + 1,
     };
 
+    console.log("Blog before update:", blog);
+
     try {
       await addLike(updatedBlog, blog.id);
       console.log("Blog liked:", updatedBlog);
@@ -41,22 +43,18 @@ const Blog = ({ blog, user, addLike, removeBlog }) => {
           <div>
             {blog.likes} likes
             <button onClick={likeBlog}>like</button>
-            {blog.user && <div>{blog.user.name}</div>}
-            {user && user.username === blog.user.username && (
-              <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      `Remove blog ${blog.title} by ${blog.author}?`
-                    )
-                  ) {
-                    removeBlog(blog.id);
-                  }
-                }}
-              >
-                remove
-              </button>
-            )}
+            {blog.user && blog.user.name && <div>{blog.user.name}</div>}
+            <button
+              onClick={() => {
+                if (
+                  window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)
+                ) {
+                  removeBlog(blog.id);
+                }
+              }}
+            >
+              remove
+            </button>
           </div>
         </div>
       )}
