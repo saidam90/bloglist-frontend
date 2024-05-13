@@ -110,7 +110,7 @@ const App = () => {
 
       setMessage(`${blogObject.title} was added by ${blogObject.author}.`);
     } catch (error) {
-      showNotification("Failed to add new blog", setErrorMessage);
+      setMessage("Failed to add new blog");
     }
     setTimeout(() => {
       setMessage(null);
