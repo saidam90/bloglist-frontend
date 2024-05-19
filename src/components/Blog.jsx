@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-const Blog = ({ blog, user, addLike, removeBlog, toggleVisibilityHandler }) => {
+const Blog = ({ blog, user, addLike, removeBlog }) => {
   const [info, setInfo] = useState(false);
 
   const likeBlog = async () => {
     const updatedBlog = {
       ...blog,
-      likes: (blog.likes || 0) + 1,
+      likes: blog.likes + 1,
     };
 
     console.log("Blog before update:", blog);
@@ -29,13 +29,10 @@ const Blog = ({ blog, user, addLike, removeBlog, toggleVisibilityHandler }) => {
 
   const toggleVisibility = () => {
     setInfo(!info);
-    if (toggleVisibilityHandler) {
-      toggleVisibilityHandler();
-    }
   };
 
   return (
-    <div style={blogStyle} className="blog" data-testid="blog">
+    <div style={blogStyle}>
       <div>
         {blog.title} {blog.author}
         <button onClick={toggleVisibility}>{info ? "hide" : "view"}</button>
