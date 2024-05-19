@@ -34,13 +34,6 @@ const Blog = ({ blog, user, addLike, removeBlog, toggleVisibilityHandler }) => {
     }
   };
 
-  const likeHandler = () => {
-    setInfo(!info);
-    if (likeHandler) {
-      toggleVisibilityHandler();
-    }
-  };
-
   return (
     <div style={blogStyle} className="blog" data-testid="blog">
       <div>
