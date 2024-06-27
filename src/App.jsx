@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
-import Login from "./components/Login";
+import Login from "./components/LoginForm";
 import Notification from "./components/Notification";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
@@ -43,6 +43,7 @@ const App = () => {
       console.log("logged in with", user.username);
       console.log("Blogs fetched:", blogs);
     } catch (exception) {
+      console.error("Wrong!!!", exception); // Debugging
       setMessage("Wrong credentials");
       setTimeout(() => {
         setMessage(null);
@@ -133,12 +134,12 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={message} />
       {user === null ? (
         loginForm()
       ) : (
         <div>
           <h2>Blogs</h2>
-          <Notification message={message} />
           <p>{user.name} is logged in.</p>
           <button onClick={handleLogout}>Log out</button>
           <Togglable buttonLabel="new blog">
