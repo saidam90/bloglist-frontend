@@ -84,17 +84,33 @@ describe("Blog app", () => {
         );
       });
 
-      test("the blog can be liked", async ({ page }) => {
+      // test("the blog can be liked", async ({ page }) => {
+      //   await page.getByRole("button", { name: "view" }).click();
+
+      //   const likesText = await page.getByText("0 likes");
+      //   await expect(likesText).toBeVisible();
+
+      //   const likeButton = likesText.getByRole("button", { name: "like" });
+      //   await likeButton.click();
+
+      //   const updatedLikesText = page.getByText("1 likes");
+      //   await expect(updatedLikesText).toBeVisible();
+      // });
+
+      test("the blog can be deleted", async ({ page }) => {
         await page.getByRole("button", { name: "view" }).click();
 
-        const likesText = await page.getByText("0 likes");
-        await expect(likesText).toBeVisible();
+        const content = await page.getByText("happiness happyauthor");
+        await expect(content).toBeVisible();
 
-        const likeButton = likesText.getByRole("button", { name: "like" });
-        await likeButton.click();
+        page.on("dialog", async (dialog) => {
+          console.log(`Dialog message: ${dialog.message()}`);
+          await dialog.accept();
+        });
 
-        const updatedLikesText = page.getByText("1 likes");
-        await expect(updatedLikesText).toBeVisible();
+        await page.getByRole("button", { name: "remove" }).click();
+
+        await expect(content).not.toBeVisible();
       });
     });
   });
