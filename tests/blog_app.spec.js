@@ -14,6 +14,14 @@ describe("Blog app", () => {
       },
     });
 
+    await request.post("/api/users", {
+      data: {
+        name: "Zuman",
+        username: "Zuman210",
+        password: "Zuman210",
+      },
+    });
+
     await page.goto("/");
   });
 
@@ -60,9 +68,7 @@ describe("Blog app", () => {
       await page.goto("/");
       await loginWith(page, "Heroo210", "Heroo210");
       await expect(page.getByText("Heroo is logged in")).toBeVisible();
-    });
 
-    test("a new blog can be created", async ({ page }) => {
       await createBlog(
         page,
         "happiness",
@@ -74,44 +80,42 @@ describe("Blog app", () => {
       ).toBeVisible();
     });
 
-    describe("and a note exists", () => {
-      beforeEach(async ({ page }) => {
-        await createBlog(
-          page,
-          "happiness",
-          "happyauthor",
-          "https://www.blog.com"
-        );
+    test("the blog can be liked", async ({ page }) => {
+      await page.getByRole("button", { name: "view" }).click();
+      await expect(page.locator(".likes")).toHaveText("0 likes");
+      await page.getByRole("button", { name: "like" }).click();
+      await expect(page.locator(".likes")).toHaveText("1 likes");
+    });
+
+    test("the blog can be deleted", async ({ page }) => {
+      await page.getByRole("button", { name: "view" }).click();
+
+      const content = await page.getByText("happiness happyauthor");
+      await expect(content).toBeVisible();
+
+      page.on("dialog", async (dialog) => {
+        console.log(`Dialog message: ${dialog.message()}`);
+        await dialog.accept();
       });
 
-      // test("the blog can be liked", async ({ page }) => {
-      //   await page.getByRole("button", { name: "view" }).click();
+      await page.getByRole("button", { name: "remove" }).click();
 
-      //   const likesText = await page.getByText("0 likes");
-      //   await expect(likesText).toBeVisible();
+      await expect(content).not.toBeVisible();
+    });
 
-      //   const likeButton = likesText.getByRole("button", { name: "like" });
-      //   await likeButton.click();
+    test("only the user who logged in can see the delete button", async ({
+      page,
+    }) => {
+      await page.getByRole("button", { name: "Log out" }).click();
 
-      //   const updatedLikesText = page.getByText("1 likes");
-      //   await expect(updatedLikesText).toBeVisible();
-      // });
+      await page.goto("/");
 
-      test("the blog can be deleted", async ({ page }) => {
-        await page.getByRole("button", { name: "view" }).click();
+      await page.getByText("log in");
 
-        const content = await page.getByText("happiness happyauthor");
-        await expect(content).toBeVisible();
-
-        page.on("dialog", async (dialog) => {
-          console.log(`Dialog message: ${dialog.message()}`);
-          await dialog.accept();
-        });
-
-        await page.getByRole("button", { name: "remove" }).click();
-
-        await expect(content).not.toBeVisible();
-      });
+      await loginWith(page, "Zuman210", "Zuman210");
+      await expect(page.getByText("Zuman is logged in")).toBeVisible();
+      await page.getByRole("button", { name: "view" }).click();
+      await expect(page.getByRole("button", { name: "remove" })).toBeHidden();
     });
   });
 });

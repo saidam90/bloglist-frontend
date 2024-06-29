@@ -44,20 +44,23 @@ const Blog = ({ blog, user, addLike, removeBlog, toggleVisibilityHandler }) => {
         <div>
           <div>{blog.url}</div>
           <div>
-            {blog.likes} likes
+            <div className="likes">{blog.likes} likes</div>
             <button onClick={likeBlog}>like</button>
-            {blog.user && blog.user.name && <div>{blog.user.name}</div>}
-            <button
-              onClick={() => {
-                if (
-                  window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)
-                ) {
-                  removeBlog(blog.id);
-                }
-              }}
-            >
-              remove
-            </button>
+            {blog.user && blog.user.username === user.username && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Remove blog ${blog.title} by ${blog.author}?`
+                    )
+                  ) {
+                    removeBlog(blog.id);
+                  }
+                }}
+              >
+                remove
+              </button>
+            )}
           </div>
         </div>
       )}
