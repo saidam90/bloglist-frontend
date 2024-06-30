@@ -69,12 +69,14 @@ describe("Blog app", () => {
       await loginWith(page, "Heroo210", "Heroo210");
       await expect(page.getByText("Heroo is logged in")).toBeVisible();
 
+      await page.getByRole("button", { name: "new blog" }).click();
       await createBlog(
         page,
         "happiness",
         "happyauthor",
         "https://www.blog.com"
       );
+
       await expect(
         page.getByText("happiness was added by happyauthor.")
       ).toBeVisible();
@@ -116,6 +118,35 @@ describe("Blog app", () => {
       await expect(page.getByText("Zuman is logged in")).toBeVisible();
       await page.getByRole("button", { name: "view" }).click();
       await expect(page.getByRole("button", { name: "remove" })).toBeHidden();
+    });
+
+    test("blogs are arranged in the order according to the likes", async ({
+      page,
+    }) => {
+      await createBlog(page, "blog1", "author1", "https://blog.com");
+      await expect(page.getByText("blog1 was added by author1.")).toBeVisible();
+
+      await createBlog(page, "blog2", "author2", "https://blog.com");
+      await expect(page.getByText("blog2 was added by author2.")).toBeVisible();
+
+      await page
+        .getByText("blog1")
+        .getByRole("button", { name: "view" })
+        .click();
+      await page.getByRole("button", { name: "like" }).first().click();
+
+      await page
+        .getByText("blog2")
+        .getByRole("button", { name: "view" })
+        .click();
+
+      await page.getByRole("button", { name: "like" }).nth(1).click();
+
+      const blogs = await page.$$eval(".blog", (blogs) =>
+        blogs.map((blog) => blog.textContent.trim())
+      );
+
+      console.log("Blogs:", blogs);
     });
   });
 });
